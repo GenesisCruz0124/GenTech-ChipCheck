@@ -1,0 +1,118 @@
+[
+  {
+    "vendor": "SK hynix",
+    "matchPrefixes": ["H9", "H26", "H28"],
+    "example": "H9TQ17ADFTMCURKUM",
+    "segments": [
+      {
+        "name": "type",
+        "label": "Chip Type",
+        "strategy": "prefix",
+        "map": { "H9": "eMCP", "H26": "eMMC", "H28": "UFS" }
+      },
+      {
+        "name": "package",
+        "label": "BGA Package",
+        "strategy": "fixedLength",
+        "length": 2,
+        "map": {
+          "DP": "BGA 153",
+          "TP": "BGA 162",
+          "TQ": "BGA 221 / BGA 529",
+          "HP": "BGA 254",
+          "HQ": "BGA 254 (UFS)"
+        }
+      },
+      {
+        "name": "storage",
+        "label": "Storage",
+        "strategy": "fixedLength",
+        "length": 2,
+        "map": {
+          "32": "4 GB", "64": "8 GB",
+          "17": "16 GB", "18": "16 GB", "19": "16 GB",
+          "26": "32 GB", "27": "32 GB",
+          "52": "64 GB", "33": "64 GB",
+          "16": "128 GB"
+        }
+      },
+      {
+        "name": "ram",
+        "label": "RAM",
+        "strategy": "fixedLength",
+        "length": 2,
+        "map": {
+          "A4": "512 MB", "A8": "1 GB", "AB": "2 GB",
+          "AD": "3 GB", "AC": "4 GB", "AE": "6 GB"
+        }
+      }
+    ]
+  },
+  {
+    "vendor": "Samsung",
+    "matchPrefixes": ["KM", "KLU", "KL", "K3", "KLM"],
+    "example": "KLUEG4RHGB",
+    "segments": [
+      {
+        "name": "type",
+        "label": "Chip Type",
+        "strategy": "prefix",
+        "map": {
+          "KM": "eMCP",
+          "KLU": "UFS",
+          "KL": "UFS",
+          "K3": "LPDDR (Discrete)",
+          "KLM": "eMMC"
+        }
+      }
+    ]
+  },
+  {
+    "vendor": "Micron",
+    "matchPrefixes": ["MT29", "MT53", "JY", "JW"],
+    "example": "MT29F32G08CBACAWP",
+    "segments": [
+      {
+        "name": "type",
+        "label": "Chip Family",
+        "strategy": "prefix",
+        "map": {
+          "MT29": "NAND / eMMC family (Micron)",
+          "MT53": "LPDDR family (Micron)",
+          "JY": "Micron FBGA code",
+          "JW": "Micron FBGA code"
+        }
+      }
+    ]
+  },
+  {
+    "vendor": "Kioxia / Toshiba",
+    "matchPrefixes": ["THG"],
+    "example": "THGBMNG5D1LBAIL",
+    "segments": [
+      {
+        "name": "type",
+        "label": "Chip Family",
+        "strategy": "prefix",
+        "map": {
+          "THG": "eMMC / UFS family (Kioxia / Toshiba)"
+        }
+      }
+    ]
+  },
+  {
+    "vendor": "YMTC",
+    "matchPrefixes": ["YM"],
+    "example": "YMN08TB9902BE1",
+    "segments": [
+      {
+        "name": "type",
+        "label": "Chip Family",
+        "strategy": "prefix",
+        "map": {
+          "YM": "YMTC NAND"
+        }
+      }
+    ]
+  }
+]
