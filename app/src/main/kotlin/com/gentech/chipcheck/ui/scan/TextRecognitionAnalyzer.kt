@@ -5,20 +5,16 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Wraps the bundled (on-device) ML Kit text recognizer -- NOT the Play Services / unbundled
- * variant, which can require a network model download on first use and would violate the
- * app's offline requirement. Frames are dropped while a recognition is already in flight.
+ * Wraps the shared bundled text recognizer for live CameraX frames. Frames are dropped while
+ * a recognition is already in flight.
  */
 class TextRecognitionAnalyzer(
     private val onLinesDetected: (List<String>) -> Unit
 ) : ImageAnalysis.Analyzer {
 
-    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     private val isProcessing = AtomicBoolean(false)
 
     @OptIn(ExperimentalGetImage::class)
@@ -30,12 +26,9 @@ class TextRecognitionAnalyzer(
         }
 
         val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-        recognizer.process(inputImage)
+        BundledTextRecognizerClient.client.process(inputImage)
             .addOnSuccessListener { visionText ->
-                val lines = visionText.textBlocks
-                    .flatMap { it.lines }
-                    .map { it.text.trim() }
-                    .filter { it.isNotBlank() }
+                val lines = BundledTextRecognizerClient.extractLines(visionText)
                 if (lines.isNotEmpty()) {
                     onLinesDetected(lines)
                 }
