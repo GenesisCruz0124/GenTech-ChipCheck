@@ -75,13 +75,26 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = false
+        }
+    }
 }
 
 androidComponents {
     onVariants(selector().all()) { variant ->
         variant.outputs.forEach { output ->
             if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
-                output.outputFileName.set("ChipCheck-v${android.defaultConfig.versionName}.apk")
+                val abi = output.filters
+                    .find { it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI }
+                    ?.identifier
+                val suffix = if (abi != null) "-$abi" else ""
+                output.outputFileName.set("ChipCheck-v${android.defaultConfig.versionName}$suffix.apk")
             }
         }
     }
