@@ -57,6 +57,7 @@ fun ScanScreen(
     ) { granted -> hasCameraPermission = granted }
 
     val detectedLines by viewModel.detectedLines.collectAsStateWithLifecycle()
+    val isReviewingPhoto by viewModel.isReviewingPhoto.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -74,7 +75,7 @@ fun ScanScreen(
             if (lines.isEmpty()) {
                 snackbarHostState.showSnackbar("No text detected in that photo")
             } else {
-                viewModel.onLinesDetected(lines)
+                viewModel.onPhotoLinesDetected(lines)
             }
         }
     }
@@ -84,7 +85,8 @@ fun ScanScreen(
             if (hasCameraPermission) {
                 Box(modifier = Modifier.weight(1f)) {
                     CameraPreview(
-                        onLinesDetected = viewModel::onLinesDetected,
+                        onLinesDetected = viewModel::onLiveCameraLinesDetected,
+                        isPaused = isReviewingPhoto,
                         modifier = Modifier.fillMaxSize()
                     )
                     GuideOverlay(modifier = Modifier.fillMaxSize())
@@ -112,10 +114,10 @@ fun ScanScreen(
             Surface(tonalElevation = 2.dp) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = if (detectedLines.isEmpty()) {
-                            "Point the camera at the chip marking"
-                        } else {
-                            "Tap the line that is the part number"
+                        text = when {
+                            isReviewingPhoto -> "Tap the line that is the part number (from chosen photo)"
+                            detectedLines.isEmpty() -> "Point the camera at the chip marking"
+                            else -> "Tap the line that is the part number"
                         },
                         style = MaterialTheme.typography.titleSmall
                     )
@@ -129,6 +131,11 @@ fun ScanScreen(
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                             )
+                        }
+                    }
+                    if (isReviewingPhoto) {
+                        TextButton(onClick = { viewModel.resumeLiveScanning() }) {
+                            Text("Resume camera scanning")
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))

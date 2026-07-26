@@ -7,6 +7,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -15,9 +16,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 @Composable
 fun CameraPreview(
     onLinesDetected: (List<String>) -> Unit,
+    isPaused: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    // The AndroidView factory below runs once, so a plain captured Boolean would be frozen at
+    // that point -- rememberUpdatedState lets the analyzer lambda always read the latest value.
+    val isPausedState = rememberUpdatedState(isPaused)
 
     AndroidView(
         modifier = modifier.fillMaxSize(),
@@ -34,7 +39,13 @@ fun CameraPreview(
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build()
                         .also {
-                            it.setAnalyzer(ContextCompat.getMainExecutor(ctx), TextRecognitionAnalyzer(onLinesDetected))
+                            it.setAnalyzer(
+                                ContextCompat.getMainExecutor(ctx),
+                                TextRecognitionAnalyzer(
+                                    onLinesDetected = onLinesDetected,
+                                    isPaused = { isPausedState.value }
+                                )
+                            )
                         }
 
                     cameraProvider.unbindAll()

@@ -9,16 +9,23 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Wraps the shared bundled text recognizer for live CameraX frames. Frames are dropped while
- * a recognition is already in flight.
+ * a recognition is already in flight, and skipped entirely (frame closed, no OCR run) while
+ * [isPaused] reports true -- e.g. while the user is reviewing a picked gallery photo's result.
  */
 class TextRecognitionAnalyzer(
-    private val onLinesDetected: (List<String>) -> Unit
+    private val onLinesDetected: (List<String>) -> Unit,
+    private val isPaused: () -> Boolean = { false }
 ) : ImageAnalysis.Analyzer {
 
     private val isProcessing = AtomicBoolean(false)
 
     @OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
+        if (isPaused()) {
+            imageProxy.close()
+            return
+        }
+
         val mediaImage = imageProxy.image
         if (mediaImage == null || !isProcessing.compareAndSet(false, true)) {
             imageProxy.close()
